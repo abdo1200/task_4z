@@ -40,6 +40,7 @@ dependencies:
   flutter_svg: ^2.0.3
   connectivity_plus: ^3.0.3
   loading_animation_widget: ^1.2.0+4
+  shared_preferences: ^2.0.18
 
 dev_dependencies:
   flutter_test:
