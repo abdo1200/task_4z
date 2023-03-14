@@ -26,7 +26,7 @@ class Home extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Obx(() =>
-                  Text('Active statu : ${controller.isConnected.value}   ')),
+                  Text('Active Status : ${controller.isConnected.value}   ')),
               Obx(() => controller.isConnected.value == 'online'
                   ? Container(
                       height: 15,
