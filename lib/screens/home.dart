@@ -44,44 +44,76 @@ class Home extends StatelessWidget {
                     )),
             ],
           ),
-          Obx(
-            () => controller.isConnected.value == "online"
-                ? controller.isLoading.value
-                    ? SizedBox(
-                        height: Get.height * .7,
-                        child: Center(
-                          child: LoadingAnimationWidget.discreteCircle(
-                            color: Colors.white,
-                            size: 50,
+          Obx(() => controller.isChecking.value
+              ? SizedBox(
+                  height: Get.height * .8,
+                  child: Center(
+                    child: LoadingAnimationWidget.discreteCircle(
+                      color: Colors.white,
+                      size: 50,
+                    ),
+                  ),
+                )
+              : controller.isConnected.value == "online"
+                  ? controller.isLoading.value
+                      ? SizedBox(
+                          height: Get.height * .8,
+                          child: Center(
+                            child: LoadingAnimationWidget.discreteCircle(
+                              color: Colors.white,
+                              size: 50,
+                            ),
                           ),
-                        ),
-                      )
-                    : Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ListView.builder(
-                            itemCount: controller.posts!.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () => Get.to(() => PostDetails(
-                                    post: controller.posts![index].data)),
-                                child: PostCard(
-                                    author:
-                                        controller.posts![index].data.author,
-                                    title: controller.posts![index].data.title),
-                              );
-                            },
+                        )
+                      : SizedBox(
+                          height: Get.height * .8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView.builder(
+                              itemCount: controller.posts!.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () => Get.to(() => PostDetails(
+                                      post: controller.posts![index].data)),
+                                  child: PostCard(
+                                      author:
+                                          controller.posts![index].data.author,
+                                      title:
+                                          controller.posts![index].data.title),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      )
-                : Container(
-                    margin: const EdgeInsets.only(top: 40),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: const Text('Check your internet connection')),
-          )
+                        )
+                  : controller.offlinePosts.isNull
+                      ? Container(
+                          margin: const EdgeInsets.only(top: 40),
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: const Text('Check your internet connection'))
+                      : SizedBox(
+                          height: Get.height * .8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView.builder(
+                              itemCount: controller.offlinePosts!.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () => Get.to(() => PostDetails(
+                                      post: controller
+                                          .offlinePosts![index].data)),
+                                  child: PostCard(
+                                      author: controller
+                                          .offlinePosts![index].data.author,
+                                      title: controller
+                                          .offlinePosts![index].data.title),
+                                );
+                              },
+                            ),
+                          ),
+                        ))
         ],
       )),
     );

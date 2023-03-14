@@ -8,6 +8,7 @@ import 'package:task_4z/model/post.dart';
 
 class PostController extends GetxController {
   var isLoading = false.obs;
+  var isChecking = false.obs;
   RxString isConnected = 'offline'.obs;
   Timer? timer;
 
@@ -18,7 +19,7 @@ class PostController extends GetxController {
     super.onInit();
     timer = Timer.periodic(
         const Duration(seconds: 1), (Timer t) => checkConnection());
-    fetchData();
+    fetchDataOffline();
   }
 
   @override
@@ -28,15 +29,26 @@ class PostController extends GetxController {
   }
 
   checkConnection() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
+    try {
+      isChecking(true);
+      final connectivityResult = await Connectivity().checkConnectivity();
 
-    if (connectivityResult == ConnectivityResult.wifi ||
-        connectivityResult == ConnectivityResult.mobile) {
-      isConnected.value = 'online';
-    } else {
-      isConnected.value = 'offline';
+      if (connectivityResult == ConnectivityResult.none) {
+        if (isConnected.value == 'online') {
+          await fetchDataOffline();
+        }
+        isConnected.value = 'offline';
+      } else {
+        if (isConnected.value == 'offline') {
+          await fetchData();
+        }
+        isConnected.value = 'online';
+      }
+      isConnected.refresh;
+    } catch (e) {
+    } finally {
+      isChecking(false);
     }
-    isConnected.refresh;
   }
 
   fetchData() async {
@@ -48,11 +60,8 @@ class PostController extends GetxController {
         var result = jsonDecode(response.body);
         posts = PostModel.fromJson(result).data.children;
       }
-      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      // Map<String, dynamic> postsModel = ;
-
-      // bool result = await prefs.setString('user', jsonEncode(user));
+      savedLocal(response.body);
     } catch (e) {
       //print(e);
     } finally {
@@ -60,20 +69,27 @@ class PostController extends GetxController {
     }
   }
 
+  savedLocal(var result) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    Map<String, dynamic> postsModel = jsonDecode(result);
+    //print(postsModel);
+    await prefs.setString('posts', jsonEncode(postsModel)).then((value) {
+      if (value) print('saved in local storage');
+    });
+  }
+
   fetchDataOffline() async {
     try {
-      SharedPreferences shared_User = await SharedPreferences.getInstance();
-      if (shared_User.getString('posts')!.isEmpty) {
-        print('empty');
+      SharedPreferences sharedUser = await SharedPreferences.getInstance();
+      if (sharedUser.getString('posts')!.isEmpty) {
       } else {
-        print('done');
         Map<String, dynamic> postsData =
-            jsonDecode(shared_User.getString('posts')!);
+            jsonDecode(sharedUser.getString('posts')!);
         offlinePosts = PostModel.fromJson(postsData).data.children;
-        print(offlinePosts);
       }
     } catch (e) {
-      //print(e);
+      print(e);
     } finally {
       isLoading(false);
     }
